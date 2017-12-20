@@ -68,6 +68,7 @@ public class CExcel {
 	Font font_min;
 	DataFormat dataformat;
 	CellStyle cs_currency_bold;
+	CellStyle cs_currency_border;
 	CellStyle cs_percent_bold;
 	CellStyle cs_estiloVariable;
 	boolean HasGroup;
@@ -138,6 +139,15 @@ public class CExcel {
 		cs_percent_bold.setFont(font_bold);
 		cs_currency_bold.setDataFormat(dataformat.getFormat("Q #,##0.00"));
 		cs_percent_bold.setDataFormat(dataformat.getFormat("0.00%"));
+		
+		cs_currency_border = workbook.createCellStyle();
+		cs_currency_border.setFont(font);
+		dataformat = workbook.createDataFormat();
+		cs_currency_border.setDataFormat(dataformat.getFormat("Q #,##0.00"));
+		cs_currency_border.setBorderTop(BorderStyle.THIN);
+		cs_currency_border.setBorderLeft(BorderStyle.THIN);
+		cs_currency_border.setBorderRight(BorderStyle.THIN);
+		cs_currency_border.setBorderBottom(BorderStyle.THIN);
 
 		cs_bold = workbook.createCellStyle();
 		cs_bold.setFont(font_bold);
@@ -176,14 +186,8 @@ public class CExcel {
 				? sheet.getRow(irow).getCell(icell) : sheet.getRow(irow).createCell(icell))
 				: sheet.createRow(irow).createCell(icell);
 		cell.setCellValue(value);
-		cs_estiloVariable.cloneStyleFrom(bold ? cs_currency_bold : cs_currency);
-		if(borde){
-			cs_estiloVariable.setBorderTop(BorderStyle.THIN);
-			cs_estiloVariable.setBorderLeft(BorderStyle.THIN);
-			cs_estiloVariable.setBorderRight(BorderStyle.THIN);
-			cs_estiloVariable.setBorderBottom(BorderStyle.THIN);
-		}
-		cell.setCellStyle(cs_estiloVariable);
+		CellStyle estiloCelda = borde ? cs_currency_border : cs_currency;
+		cell.setCellStyle(estiloCelda);
 	}
 
 	public void setCellValueDouble(double value, int irow, int icell, boolean borde) {
@@ -370,7 +374,7 @@ public class CExcel {
 						case "percent":
 							setCellValuePercent(Double.parseDouble((f.get(data.get(i))).toString()), line, j, false, false);
 							break;
-						case "string_sin_formato":
+						case "stringsinformat":
 							setCellValueStringSinFormato(String.class.cast(f.get(data.get(i))), line, j, false, false);
 							break;
 						}
@@ -431,7 +435,8 @@ public class CExcel {
 				int first_data_line = line + 1;
 				int last_data_line = line + 1;
 				ArrayList<String> lineas = new ArrayList<String>();
-				for (int i = 0; i < data.length; i++) {	
+				if(data != null){
+					for (int i = 0; i < data.length; i++) {	
 						for (int j = 0; j < data[i].length; j++) {
 							if(data[i][j]!=null) {
 								switch (headers[2][j]) {
@@ -450,6 +455,9 @@ public class CExcel {
 									break;
 								case "string":
 									setCellValueString(String.class.cast(data[i][j]), line, j, false, borde);
+									break;
+								case "stringsinformat":
+									setCellValueStringSinFormato(String.class.cast(data[i][j]), line, j, false, borde);
 									break;
 								case "percent":
 									if(!data[i][j].isEmpty()){
@@ -477,7 +485,9 @@ public class CExcel {
 						}
 					
 					line++;
+					}
 				}
+				
 				line = setOperations(headers, lineas, line, first_data_line, last_data_line);
 			}
 			Header(report_name, headers[0].length);
@@ -605,7 +615,7 @@ public class CExcel {
 				case "string":
 					setCellValueString(String.class.cast(stgrafica.data[i][j]), linea, columna+j, false, true);
 					break;
-				case "string_sin_formato":
+				case "stringsinformat":
 					setCellValueString(String.class.cast(stgrafica.data[i][j]), linea, columna+j, false, true);
 					break;
 				case "percent":
@@ -675,7 +685,7 @@ public class CExcel {
 		sheet_.autoSizeColumn(3);
 
 		try {
-			path = String.join("", "/archivos/temporales/temp_", ((Long) new Date().getTime()).toString(), ".xls");
+			path = String.join("", "/SIPRO/archivos/temporales/temp_", ((Long) new Date().getTime()).toString(), ".xls");
 			FileOutputStream out = new FileOutputStream(new File(path));
 			workbook_.write(out);
 			out.close();
@@ -714,7 +724,7 @@ public class CExcel {
 		sheet_.autoSizeColumn(3);
 		
 		try {
-			path = String.join("", "/archivos/temporales/temp_", ((Long) new Date().getTime()).toString(), ".xls");
+			path = String.join("", "/SIPRO/archivos/temporales/temp_", ((Long) new Date().getTime()).toString(), ".xls");
 			FileOutputStream out = new FileOutputStream(new File(path));
 			workbook_.write(out);
 			out.close();
